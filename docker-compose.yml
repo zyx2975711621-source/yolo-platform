@@ -1,0 +1,87 @@
+# ============================================================
+# YOLO 训练平台 — 用户一键部署
+#
+# 使用方法:
+#   1. 将此文件和 .env 放到同一目录
+#   2. CPU 模式（默认）: docker compose up -d
+#   3. GPU 模式:         docker compose --profile gpu up -d
+#   4. 打开浏览器访问 http://localhost:8000
+#
+# 无需下载源码，无需配置环境，自动拉取镜像。
+# ============================================================
+
+services:
+  # ---- MySQL 数据库 ----
+  mysql:
+    image: mysql:8.0
+    container_name: yolo-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: yolo_root_2024
+      MYSQL_DATABASE: yolo_platform
+      MYSQL_USER: yolo
+      MYSQL_PASSWORD: yolo123
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pyolo_root_2024"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  # ---- CPU 模式（默认）----
+  yolo-platform-cpu:
+    image: ${DOCKER_REGISTRY:-}yolo-platform:cpu
+    container_name: yolo-platform-cpu
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DATABASE_URL=mysql+pymysql://yolo:yolo123@mysql:3306/yolo_platform
+      - HF_HOME=/app/hf_cache
+      - HF_ENDPOINT=https://hf-mirror.com
+    depends_on:
+      mysql:
+        condition: service_healthy
+    profiles:
+      - cpu
+      - ""
+
+  # ---- GPU 模式 ----
+  yolo-platform-gpu:
+    image: ${DOCKER_REGISTRY:-}yolo-platform:gpu
+    container_name: yolo-platform-gpu
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DATABASE_URL=mysql+pymysql://yolo:yolo123@mysql:3306/yolo_platform
+      - HF_HOME=/app/hf_cache
+      - HF_ENDPOINT=https://hf-mirror.com
+    depends_on:
+      mysql:
+        condition: service_healthy
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    profiles:
+      - gpu
+
+volumes:
+  mysql_data:
+    driver: local
