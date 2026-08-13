@@ -40,6 +40,7 @@ services:
       - "8000:8000"
     volumes:
       - ./data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
     environment:
       - HOST=0.0.0.0
@@ -47,6 +48,9 @@ services:
       - DATABASE_URL=mysql+pymysql://yolo:yolo123@mysql:3306/yolo_platform
       - HF_HOME=/app/hf_cache
       - HF_ENDPOINT=https://hf-mirror.com
+      # 宿主机数据目录绝对路径（编译部署经宿主机 Docker 挂载真实数据用）。
+      # Linux/Mac 自动生效；Windows 请改为绝对路径，如 D:/yolo_platform_demo-003_docker/data
+      - HOST_DATA_DIR=${PWD}/data
     depends_on:
       mysql:
         condition: service_healthy
@@ -62,6 +66,7 @@ services:
       - "8000:8000"
     volumes:
       - ./data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
     environment:
       - HOST=0.0.0.0
@@ -69,6 +74,9 @@ services:
       - DATABASE_URL=mysql+pymysql://yolo:yolo123@mysql:3306/yolo_platform
       - HF_HOME=/app/hf_cache
       - HF_ENDPOINT=https://hf-mirror.com
+      # 宿主机数据目录绝对路径（编译部署经宿主机 Docker 挂载真实数据用）。
+      # Linux/Mac 自动生效；Windows 请改为绝对路径，如 D:/yolo_platform_demo-003_docker/data
+      - HOST_DATA_DIR=${PWD}/data
     depends_on:
       mysql:
         condition: service_healthy

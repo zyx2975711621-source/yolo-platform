@@ -26,7 +26,7 @@ docker compose --profile gpu up -d
 # DOCKER_REGISTRY=ccgogogo/
 
 # 阿里云 ACR (国内)
-DOCKER_REGISTRY=registry.cn-hangzhou.aliyuncs.com/hahayykx/
+DOCKER_REGISTRY=crpi-qq3w8lepco7xyohi.cn-hangzhou.personal.cr.aliyuncs.com/hahayykx/
 ```
 
 ## 功能
@@ -43,10 +43,14 @@ DOCKER_REGISTRY=registry.cn-hangzhou.aliyuncs.com/hahayykx/
 
 所有数据保存在 `./data` 目录，删除容器不丢数据。
 
-## 停止/更新
+## 更新
 
 ```bash
 docker compose down          # 停止
 docker compose pull          # 拉取最新镜像
-docker compose up -d         # 重新启动
+docker compose up -d         # 重新启动（数据不丢）
 ```
+
+## 开发者
+
+完整使用说明、项目结构、维护指南见 [USAGE.md](USAGE.md)。
