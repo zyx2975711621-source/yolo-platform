@@ -17,17 +17,7 @@ docker compose --profile gpu up -d
 # http://localhost:8000
 ```
 
-## 切换国内镜像源
-
-如果拉取镜像慢，编辑 `.env` 文件，注释 Docker Hub 行，取消阿里云 ACR 注释：
-
-```env
-# Docker Hub (国外)
-# DOCKER_REGISTRY=ccgogogo/
-
-# 阿里云 ACR (国内)
-DOCKER_REGISTRY=crpi-qq3w8lepco7xyohi.cn-hangzhou.personal.cr.aliyuncs.com/hahayykx/
-```
+> 首次启动会自动拉取 mysql、平台、TPU-MLIR 编译服务三个镜像，共约 20+ GB，需下载一段时间。
 
 ## 功能
 
@@ -37,11 +27,11 @@ DOCKER_REGISTRY=crpi-qq3w8lepco7xyohi.cn-hangzhou.personal.cr.aliyuncs.com/hahay
 - 模型训练（后台异步，支持 CPU/GPU）
 - 模型测试（上传图片验证效果）
 - 算法流水线（目标检测、跟踪、区域入侵、绊线检测、人群密度、边缘检测、颜色识别）
-- 模型编译部署（ONNX → BM1684X BModel）
+- 模型编译部署（ONNX → BM1684X BModel，内置 TPU-MLIR 编译服务，开箱即用）
 
 ## 数据存储
 
-所有数据保存在 `./data` 目录，删除容器不丢数据。
+所有数据保存在 `./data` 目录 + `mysql_data` 数据卷，删除容器不丢数据（不要用 `docker compose down -v`，会清空数据库）。
 
 ## 更新
 
@@ -51,6 +41,7 @@ docker compose pull          # 拉取最新镜像
 docker compose up -d         # 重新启动（数据不丢）
 ```
 
-## 开发者
+## 常见问题
 
-完整使用说明、项目结构、维护指南见 [USAGE.md](USAGE.md)。
+- **编译一直等待/超时**：确认编译服务在运行 —— `docker compose ps` 查看 `yolo-tpu-compile`，日志 `docker compose logs tpu-compile`。
+- **端口被占用**：改 `docker-compose.yml` 里 `ports` 左边的端口号（如 `8000:8000` → `8080:8000`）。
